@@ -1,0 +1,34 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "api/generate-image.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/generate-image",
+            "methods": [
+                "POST",
+                "OPTIONS"
+            ],
+            "dest": "/api/generate-image.js"
+        },
+        {
+            "src": "/",
+            "dest": "/server.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/server.js"
+        }
+    ],
+    "env": {
+        "NODE_ENV": "production"
+    }
+}
