@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .result img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .example-btn {
+            background: #28a745;
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .example-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Trading Image Generator</h1>
+        <p>Generate gambar trading position dengan template win/loss</p>
+
+        <form id="imageForm">
+            <div class="form-group">
+                <label for="symbol">Symbol:</label>
+                <input type="text" id="symbol" name="symbol" value="XRPUSDT" required>
+            </div>
+
+            <div class="form-group">
+                <label for="position">Position:</label>
+                <select id="position" name="position" required>
+                    <option value="long">Long (Warna Hijau)</option>
+                    <option value="short" selected>Short (Warna Merah)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="leverage">Leverage:</label>
+                <input type="text" id="leverage" name="leverage" value="125" required>
+            </div>
+
+            <div class="form-group">
+                <label for="close_price">Close Price:</label>
+                <input type="text" id="close_price" name="close_price" value="2.2093" required>
+            </div>
+
+            <div class="form-group">
+                <label for="open_price">Open Price:</label>
+                <input type="text" id="open_price" name="open_price" value="2.2229" required>
+            </div>
+
+            <div class="form-group">
+                <label for="profit_percentage">Profit Percentage:</label>
+                <input type="text" id="profit_percentage" name="profit_percentage" value="76.47" required>
+                <small>Contoh: 76.47 (akan otomatis ditambahkan %)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="closed_position">Closed Position:</label>
+                <select id="closed_position" name="closed_position" required>
+                    <option value="win">Win (Background Hijau)</option>
+                    <option value="loss">Loss (Background Merah)</option>
+                </select>
+            </div>
+
+            <button type="submit">Generate Image</button>
+        </form>
+
+        <div class="examples">
+            <h3>Contoh Cepat:</h3>
+            <button class="example-btn" onclick="fillExample('win_short')">Win + Short</button>
+            <button class="example-btn" onclick="fillExample('loss_short')">Loss + Short</button>
+            <button class="example-btn" onclick="fillExample('win_long')">Win + Long</button>
+            <button class="example-btn" onclick="fillExample('loss_long')">Loss + Long</button>
+        </div>
+
+        <div class="loading" id="loading">
+            Generating image...
+        </div>
+
+        <div class="result" id="result">
+            <!-- Hasil gambar akan ditampilkan di sini -->
+        </div>
+    </div>
+
+    <script>
+        // Contoh data
+        const examples = {
+            win_short: {
+                symbol: "XRPUSDT",
+                position: "short",
+                leverage: "125",
+                close_price: "2.2093",
+                open_price: "2.2229",
+                profit_percentage: "76.47",
+                closed_position: "win"
+            },
+            loss_short: {
+                symbol: "BTCUSDT",
+                position: "short",
+                leverage: "50",
+                close_price: "45000",
+                open_price: "44500",
+                profit_percentage: "1.12",
+                closed_position: "loss"
+            },
+            win_long: {
+                symbol: "ETHUSDT",
+                position: "long",
+                leverage: "75",
+                close_price: "2500",
+                open_price: "2450",
+                profit_percentage: "2.04",
+                closed_position: "win"
+            },
+            loss_long: {
+                symbol: "ADAUSDT",
+                position: "long",
+                leverage: "30",
+                close_price: "0.45",
+                open_price: "0.48",
+                profit_percentage: "6.25",
+                closed_position: "loss"
+            }
+        };
+
+        function fillExample(exampleKey) {
+            const example = examples[exampleKey];
+            for (const [key, value] of Object.entries(example)) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = value;
+                }
+            }
+        }
+
+        document.getElementById('imageForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {
+                symbol: formData.get('symbol'),
+                position: formData.get('position'),
+                leverage: formData.get('leverage'),
+                close_price: formData.get('close_price'),
+                open_price: formData.get('open_price'),
+                profit_percentage: formData.get('profit_percentage'),
+                closed_position: formData.get('closed_position')
+            };
+
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+
+            loading.style.display = 'block';
+            result.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+
+                if (responseData.success) {
+                    result.innerHTML = `
+                        <h3>Generated Image (${data.closed_position.toUpperCase()} - ${data.position.toUpperCase()}):</h3>
+                        <img src="${responseData.image_url}" alt="Trading Position">
+                        <p><strong>URL:</strong> <a href="${responseData.image_url}" target="_blank">${responseData.image_url}</a></p>
+                        <p><strong>Details:</strong> ${data.symbol} | ${data.position} | ${data.leverage}X | ${data.profit_percentage}%</p>
+                    `;
+                } else {
+                    result.innerHTML = `<p style="color: red;">Error: ${responseData.error}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
