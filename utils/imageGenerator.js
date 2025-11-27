@@ -147,7 +147,7 @@ class TradingImageGenerator {
         }
         formattedProfit = formattedProfit.replace('%', '') + '%';
 
-        ctx.font = `112px Arial`;
+        ctx.font = `120px Arial`;
         ctx.fillStyle = profitColor;
         ctx.fillText(
             formattedProfit,
