@@ -63,7 +63,7 @@ router.post('/generate-image', async (req, res) => {
 
         // Dapatkan URL public
         const { data: { publicUrl } } = supabase.storage
-            .from('trading-images')
+            .from('pnl')
             .getPublicUrl(fileName);
 
         res.json({
